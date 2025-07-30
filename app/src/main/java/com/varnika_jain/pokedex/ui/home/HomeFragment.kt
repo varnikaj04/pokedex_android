@@ -1,0 +1,70 @@
+package com.varnika_jain.pokedex.ui.home
+
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.varnika_jain.pokedex.databinding.FragmentHomeBinding
+import com.varnika_jain.pokedex.repository.PokemonRepository
+import com.varnika_jain.pokedex.utils.GenericViewModelFactory
+import com.varnika_jain.pokedex.data.remote.Result
+import com.varnika_jain.pokedex.data.remote.RetrofitInstance
+import java.util.ArrayList
+
+class HomeFragment : Fragment() {
+
+    private lateinit var viewModel: HomeViewModel
+    private lateinit var binding: FragmentHomeBinding
+    private lateinit var adapter: PokemonAdapter
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentHomeBinding.inflate(layoutInflater)
+        adapter = PokemonAdapter(requireContext(), arrayListOf())
+
+        val repository = PokemonRepository(
+            pokemonService = RetrofitInstance.apiService
+        )
+
+        val factory = GenericViewModelFactory {
+            HomeViewModel(repository)
+        }
+
+        viewModel = ViewModelProvider(this, factory).get(HomeViewModel::class.java)
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.fetchPokemonList(10)
+        binding.recyclerView.adapter = adapter
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.pokemonState.collect { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        Log.d("TAG", "onViewCreated: Loading... ")
+                    }
+
+                    is Result.Success -> {
+                        adapter.submitList(ArrayList(result.data))
+                        Log.d("TAG", "onViewCreated: Success... ")
+                    }
+
+                    is Result.Error -> {
+                        Log.d("TAG", "onViewCreated: Error... ")
+                    }
+                }
+            }
+        }
+    }
+
+}
