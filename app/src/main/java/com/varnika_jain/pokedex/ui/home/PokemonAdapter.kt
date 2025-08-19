@@ -16,7 +16,8 @@ import com.varnika_jain.pokedex.utils.ImageLoadState
 import com.varnika_jain.pokedex.utils.loadImage
 
 class PokemonAdapter(
-    val context: Context, private var pokemonList: ArrayList<Pokemon>
+    val context: Context, private var pokemonList: ArrayList<Pokemon>,
+    private val onPokemonClick: (Pokemon) -> Unit
 ) : RecyclerView.Adapter<PokemonAdapter.PokemonViewHolder>() {
 
     class PokemonViewHolder(val binding: ListItemPokemonBinding) :
@@ -40,7 +41,7 @@ class PokemonAdapter(
                 val pokemon = pokemonList[position]
                 val progressBar: ProgressBar = loadingSpinner
 
-                val id = pokemon.url.trimEnd('/').split("/").last()
+                val id = pokemon.id
 
                 val imageUrl =
                     "https://unpkg.com/pokeapi-sprites@2.0.2/sprites/pokemon/other/dream-world/$id.svg"
@@ -81,6 +82,8 @@ class PokemonAdapter(
                     }
                 )
                 tvPokeName.text = pokemon.name.replaceFirstChar { it.uppercaseChar() }
+
+                itemView.setOnClickListener { onPokemonClick(pokemon) }
 
             }
         }
