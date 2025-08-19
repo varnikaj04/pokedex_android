@@ -13,10 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.varnika_jain.pokedex.data.remote.Pokemon
 import com.varnika_jain.pokedex.databinding.ListItemPokemonBinding
 import com.varnika_jain.pokedex.utils.ImageLoadState
+import com.varnika_jain.pokedex.utils.buildImageUrl
 import com.varnika_jain.pokedex.utils.loadImage
 
 class PokemonAdapter(
-    val context: Context, private var pokemonList: ArrayList<Pokemon>,
+    val context: Context,
+    private var pokemonList: ArrayList<Pokemon>,
     private val onPokemonClick: (Pokemon) -> Unit
 ) : RecyclerView.Adapter<PokemonAdapter.PokemonViewHolder>() {
 
@@ -41,13 +43,8 @@ class PokemonAdapter(
                 val pokemon = pokemonList[position]
                 val progressBar: ProgressBar = loadingSpinner
 
-                val id = pokemon.id
-
-                val imageUrl =
-                    "https://unpkg.com/pokeapi-sprites@2.0.2/sprites/pokemon/other/dream-world/$id.svg"
-
                 imgPokemon.loadImage(
-                    imageUrl = imageUrl,
+                    imageUrl = pokemon.id.buildImageUrl(),
                     allowCaching = true,
                     imageLoadListener = { state ->
                         when (state) {
@@ -63,8 +60,7 @@ class PokemonAdapter(
                                         swatch?.let {
                                             pokeLayout.setBackgroundColor(
                                                 ColorUtils.setAlphaComponent(
-                                                    it.rgb,
-                                                    (0.7f * 255).toInt()
+                                                    it.rgb, (0.7f * 255).toInt()
                                                 )
                                             )
                                             tvPokeName.setTextColor(it.bodyTextColor)
@@ -79,8 +75,7 @@ class PokemonAdapter(
                                 Log.e("ImageView.loadImage", "Image load failed", state.throwable)
                             }
                         }
-                    }
-                )
+                    })
                 tvPokeName.text = pokemon.name.replaceFirstChar { it.uppercaseChar() }
 
                 itemView.setOnClickListener { onPokemonClick(pokemon) }

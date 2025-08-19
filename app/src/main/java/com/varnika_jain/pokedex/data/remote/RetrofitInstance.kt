@@ -1,5 +1,6 @@
 package com.varnika_jain.pokedex.data.remote
 
+import com.varnika_jain.pokedex.repository.PokemonRepository
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -25,6 +26,10 @@ object RetrofitInstance {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(PokemonService::class.java)
+    }
+
+    val pokemonRepository by lazy {
+        PokemonRepository(apiService)
     }
 }
 
