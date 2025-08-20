@@ -9,9 +9,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.palette.graphics.Palette
 import com.google.android.material.textview.MaterialTextView
@@ -22,9 +19,9 @@ import com.varnika_jain.pokedex.data.remote.RetrofitInstance.pokemonRepository
 import com.varnika_jain.pokedex.databinding.FragmentDetailsBinding
 import com.varnika_jain.pokedex.utils.ImageLoadState
 import com.varnika_jain.pokedex.utils.buildImageUrl
+import com.varnika_jain.pokedex.utils.collectFlow
 import com.varnika_jain.pokedex.utils.loadImage
 import com.varnika_jain.pokedex.utils.viewModelFactory
-import kotlinx.coroutines.launch
 
 
 class DetailFragment : Fragment() {
@@ -47,63 +44,59 @@ class DetailFragment : Fragment() {
         val inflater = LayoutInflater.from(requireContext())
 
         viewModel.fetchPokemonDetails(args.pokemonId)
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.pokemonState.collect { result ->
-                    when (result) {
-                        is Result.Loading -> {
-                            Log.d("TAG", "onViewCreated: Loading... ")
-                        }
 
-                        is Result.Success -> {
-                            pokemonDetails = result.data
-                            binding.ivPokemonImg.loadImage(
-                                imageUrl = args.pokemonId.buildImageUrl(),
-                                allowCaching = true,
-                                imageLoadListener = { state ->
-                                    when (state) {
-                                        is ImageLoadState.Loading -> {
-                                            Log.d("TAG", "onViewCreated: Image is loading....")
-                                        }
+        collectFlow(viewModel.pokemonState) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    Log.d("TAG", "onViewCreated: Loading... ")
+                }
 
-                                        is ImageLoadState.Success -> {
+                is Result.Success -> {
+                    pokemonDetails = result.data
+                    binding.ivPokemonImg.loadImage(
+                        imageUrl = args.pokemonId.buildImageUrl(),
+                        allowCaching = true,
+                        imageLoadListener = { state ->
+                            when (state) {
+                                is ImageLoadState.Loading -> {
+                                    Log.d("TAG", "onViewCreated: Image is loading....")
+                                }
 
-                                            val drawable = binding.ivPokemonImg.drawable
-                                            if (drawable is BitmapDrawable) {
-                                                Palette.from(drawable.bitmap).generate { palette ->
-                                                    val swatch = palette?.dominantSwatch
-                                                        ?: palette?.vibrantSwatch
-                                                    swatch?.let {
-                                                        binding.ivPokemonImg.setBackgroundColor(
-                                                            ColorUtils.setAlphaComponent(
-                                                                it.rgb, (0.7f * 255).toInt()
-                                                            )
-                                                        )
-                                                    }
-                                                }
+                                is ImageLoadState.Success -> {
+
+                                    val drawable = binding.ivPokemonImg.drawable
+                                    if (drawable is BitmapDrawable) {
+                                        Palette.from(drawable.bitmap).generate { palette ->
+                                            val swatch =
+                                                palette?.dominantSwatch ?: palette?.vibrantSwatch
+                                            swatch?.let {
+                                                binding.ivPokemonImg.setBackgroundColor(
+                                                    ColorUtils.setAlphaComponent(
+                                                        it.rgb, (0.7f * 255).toInt()
+                                                    )
+                                                )
                                             }
-
-                                        }
-
-                                        is ImageLoadState.Error -> {
-                                            Log.e(
-                                                "ImageView.loadImage",
-                                                "Image load failed",
-                                                state.throwable
-                                            )
                                         }
                                     }
-                                })
-                            Log.d("TAG", "onViewCreated: Success... Result ${result.data.name} ")
-                        }
 
-                        is Result.Error -> {
-                            Log.d("TAG", "onViewCreated: Error... ")
-                        }
-                    }
+                                }
+
+                                is ImageLoadState.Error -> {
+                                    Log.e(
+                                        "ImageView.loadImage", "Image load failed", state.throwable
+                                    )
+                                }
+                            }
+                        })
+                    Log.d("TAG", "onViewCreated: Success... Result ${result.data.name} ")
+                }
+
+                is Result.Error -> {
+                    Log.d("TAG", "onViewCreated: Error... ")
                 }
             }
         }
+
         val parentLayout = view.findViewById<LinearLayout>(R.id.layoutPowerTypes)
         val powerTypes = listOf("Water", "Electric")
 

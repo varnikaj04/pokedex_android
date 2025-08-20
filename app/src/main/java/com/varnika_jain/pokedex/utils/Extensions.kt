@@ -3,14 +3,19 @@ package com.varnika_jain.pokedex.utils
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import coil.ImageLoader
 import coil.decode.SvgDecoder
 import coil.load
 import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import coil.transform.RoundedCornersTransformation
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 
 fun Int.buildImageUrl(): String {
@@ -75,5 +80,17 @@ inline fun <reified VM : ViewModel> Fragment.viewModelFactory(
 ): Lazy<VM> {
     return lazy {
         ViewModelProvider(this, GenericViewModelFactory { provider() })[VM::class.java]
+    }
+}
+
+inline fun <T> Fragment.collectFlow(
+    flow: Flow<T>,
+    state: Lifecycle.State = Lifecycle.State.STARTED,
+    crossinline collector: suspend (T) -> Unit
+) {
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(state) {
+            flow.collect { value -> collector(value) }
+        }
     }
 }
