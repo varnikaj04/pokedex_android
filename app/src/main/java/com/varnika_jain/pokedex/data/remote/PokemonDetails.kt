@@ -1,7 +1,7 @@
 package com.varnika_jain.pokedex.data.remote
 
 data class PokemonDetails(
-    val baseExperience: Int?,
+    val base_experience: Int?,
     val height: Int?,
     val id: Int?,
     val isDefault: Boolean?,
@@ -12,7 +12,7 @@ data class PokemonDetails(
     val weight: Int?
 ) {
     data class Stats(
-        val baseStat: Int?,
+        val base_stat: Int?,
         val effort: Int?,
         val stat: Stat?
     ) {

@@ -2,20 +2,22 @@ package com.varnika_jain.pokedex.ui.details
 
 import android.content.res.ColorStateList
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.palette.graphics.Palette
 import com.google.android.material.textview.MaterialTextView
 import com.varnika_jain.pokedex.R
+import com.varnika_jain.pokedex.data.local.PaletteColors
 import com.varnika_jain.pokedex.data.remote.PokemonDetails
 import com.varnika_jain.pokedex.data.remote.Result
 import com.varnika_jain.pokedex.data.remote.RetrofitInstance.pokemonRepository
@@ -25,6 +27,13 @@ import com.varnika_jain.pokedex.utils.buildImageUrl
 import com.varnika_jain.pokedex.utils.collectFlow
 import com.varnika_jain.pokedex.utils.loadImage
 import com.varnika_jain.pokedex.utils.viewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class DetailFragment : Fragment() {
@@ -35,6 +44,9 @@ class DetailFragment : Fragment() {
     private lateinit var pokemonDetails: PokemonDetails
     private lateinit var adapter: PokeDetailsAdapter
     private val args: DetailFragmentArgs by navArgs()
+    private val _paletteColors = MutableStateFlow(PaletteColors(null, null))
+    private val paletteColors: StateFlow<PaletteColors> = _paletteColors.asStateFlow()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -43,7 +55,7 @@ class DetailFragment : Fragment() {
 
         binding.backBtn.setOnClickListener { findNavController().navigateUp() }
         adapter = PokeDetailsAdapter(
-            requireContext(), arrayListOf()
+            context = requireContext(), statsList = arrayListOf()
         )
 
         return binding.root
@@ -73,6 +85,17 @@ class DetailFragment : Fragment() {
             }
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            paletteColors.collectLatest { colors ->
+                colors.background?.let { bg ->
+                    binding.ivPokemonImg.setBackgroundColor(bg)
+                    tintPowerTypes(bg)
+                    setPokemonStats()
+                }
+
+            }
+        }
+
     }
 
     private fun setupPokemonImage() {
@@ -86,18 +109,11 @@ class DetailFragment : Fragment() {
                     }
 
                     is ImageLoadState.Success -> {
-
                         val drawable = binding.ivPokemonImg.drawable
-                        if (drawable is BitmapDrawable) {
-                            Palette.from(drawable.bitmap).generate { palette ->
-                                val swatch =
-                                    palette?.dominantSwatch ?: palette?.vibrantSwatch
-                                swatch?.let {
-                                    val bgColor =
-                                        ColorUtils.setAlphaComponent(it.rgb, (0.7f * 255).toInt())
-                                    binding.ivPokemonImg.setBackgroundColor(bgColor)
-                                    tintPowerTypes(bgColor)
-                                }
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val color = extractDominantColor(drawable)
+                            if (color != null) {
+                                _paletteColors.value = color
                             }
                         }
 
@@ -120,16 +136,16 @@ class DetailFragment : Fragment() {
         binding.tvHeightValue.text =
             String.format(getString(R.string.str_pokemon_height), pokemonDetails.height)
         setPokemonTypes()
-        setPokemonStats()
     }
 
     private fun setPokemonStats() {
         val pokemonStats = pokemonDetails.stats
         binding.rvStats.adapter = adapter
         if (pokemonStats.isNotEmpty()) {
-            adapter.submitStatsList(pokemonStats)
+            adapter.submitStatsList(
+                pokemonStats, paletteColors.value.background, paletteColors.value.text
+            )
         }
-
     }
     private fun setPokemonTypes() {
         val inflater = LayoutInflater.from(requireContext())
@@ -141,8 +157,6 @@ class DetailFragment : Fragment() {
             val textView =
                 inflater.inflate(R.layout.item_power_type, parentLayout, false) as MaterialTextView
             textView.text = types?.type?.name
-            textView.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.primary)
             parentLayout?.addView(textView)
         }
     }
@@ -154,6 +168,21 @@ class DetailFragment : Fragment() {
             if (child is MaterialTextView) {
                 child.backgroundTintList = ColorStateList.valueOf(color)
             }
+        }
+    }
+
+    private suspend fun extractDominantColor(drawable: Drawable): PaletteColors? {
+        return withContext(Dispatchers.Default) {
+            if (drawable is BitmapDrawable) {
+                val palette = Palette.from(drawable.bitmap).generate()
+                val swatch = palette.dominantSwatch ?: palette.vibrantSwatch
+                swatch?.let {
+                    PaletteColors(
+                        background = ColorUtils.setAlphaComponent(it.rgb, (0.7f * 255).toInt()),
+                        text = it.bodyTextColor
+                    )
+                } ?: PaletteColors(null, null)
+            } else PaletteColors(null, null)
         }
     }
 }
