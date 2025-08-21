@@ -1,48 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="6dp">
+        android:layout_margin="5dp"
+        android:padding="5dp">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvStatLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="10dp"
-            android:textSize="15sp"
-            tools:text="HP" />
-
-        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:paddingHorizontal="10dp"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toStartOf="@id/progressStats"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="solid grass" />
 
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/progressStats"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:progress="30"
-                android:maxWidth="500dp"
-                app:indicatorTrackGapSize="0dp"
-                app:trackCornerRadius="10dp"
-                app:trackThickness="15dp" />
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progressStats"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:maxWidth="500dp"
+            android:progress="30"
+            app:indicatorTrackGapSize="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/tvStatLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvStatLabel"
+            app:layout_constraintWidth_percent=".85"
+            app:trackCornerRadius="10dp"
+            app:trackThickness="20dp" />
 
-            <TextView
-                android:id="@+id/tvStatValue"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:textSize="13sp"
-                tools:text="20/300" />
-        </FrameLayout>
-
-    </LinearLayout>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvStatValue"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@id/progressStats"
+            app:layout_constraintEnd_toEndOf="@id/progressStats"
+            app:layout_constraintStart_toStartOf="@id/progressStats"
+            app:layout_constraintTop_toTopOf="@id/progressStats"
+            tools:text="20/300" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
