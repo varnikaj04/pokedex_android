@@ -131,7 +131,6 @@ class DetailFragment : Fragment() {
         }
 
     }
-
     private fun setPokemonTypes() {
         val inflater = LayoutInflater.from(requireContext())
         val parentLayout = view?.findViewById<LinearLayout>(R.id.layoutPowerTypes)
