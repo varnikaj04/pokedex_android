@@ -7,7 +7,7 @@ data class PokemonDetails(
     val isDefault: Boolean?,
     val name: String?,
     val order: Int?,
-    val stats: List<Stats?>?,
+    val stats: ArrayList<Stats?>,
     val types: List<Types?>?,
     val weight: Int?
 ) {

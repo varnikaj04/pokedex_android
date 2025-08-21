@@ -25,7 +25,6 @@ import com.varnika_jain.pokedex.utils.buildImageUrl
 import com.varnika_jain.pokedex.utils.collectFlow
 import com.varnika_jain.pokedex.utils.loadImage
 import com.varnika_jain.pokedex.utils.viewModelFactory
-import java.util.ArrayList
 
 
 class DetailFragment : Fragment() {
@@ -126,10 +125,9 @@ class DetailFragment : Fragment() {
 
     private fun setPokemonStats() {
         val pokemonStats = pokemonDetails.stats
-        val statList = ArrayList<PokemonDetails.Stats>(pokemonStats)
         binding.rvStats.adapter = adapter
-        if (!pokemonStats.isNullOrEmpty()){
-            adapter.submitStatsList(statList)
+        if (pokemonStats.isNotEmpty()) {
+            adapter.submitStatsList(pokemonStats)
         }
 
     }

@@ -6,7 +6,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
+        android:layout_marginHorizontal="5dp"
         android:padding="5dp">
 
         <com.google.android.material.textview.MaterialTextView
@@ -14,7 +14,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:paddingHorizontal="10dp"
-            android:textAlignment="center"
+            android:textAlignment="textStart"
             android:textSize="15sp"
             app:layout_constraintEnd_toStartOf="@id/progressStats"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,9 +32,9 @@
             app:layout_constraintBottom_toBottomOf="@id/tvStatLabel"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tvStatLabel"
-            app:layout_constraintWidth_percent=".85"
+            app:layout_constraintWidth_percent=".65"
             app:trackCornerRadius="10dp"
-            app:trackThickness="20dp" />
+            app:trackThickness="15dp" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvStatValue"

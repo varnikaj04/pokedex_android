@@ -40,7 +40,7 @@ class PokeDetailsAdapter(
 
     override fun getItemCount() = statsList.size
 
-    fun submitStatsList(list: ArrayList<PokemonDetails.Stats>) {
+    fun submitStatsList(list: ArrayList<PokemonDetails.Stats?>) {
         statsList.clear()
         statsList.addAll(list)
         notifyDataSetChanged()
