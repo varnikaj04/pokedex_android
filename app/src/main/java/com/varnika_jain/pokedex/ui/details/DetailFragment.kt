@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,10 +24,10 @@ import com.varnika_jain.pokedex.data.remote.Result
 import com.varnika_jain.pokedex.data.remote.RetrofitInstance.pokemonRepository
 import com.varnika_jain.pokedex.databinding.FragmentDetailsBinding
 import com.varnika_jain.pokedex.utils.ImageLoadState
+import com.varnika_jain.pokedex.utils.activityViewModelFactory
 import com.varnika_jain.pokedex.utils.buildImageUrl
 import com.varnika_jain.pokedex.utils.collectFlow
 import com.varnika_jain.pokedex.utils.loadImage
-import com.varnika_jain.pokedex.utils.viewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +38,7 @@ import kotlinx.coroutines.withContext
 
 
 class DetailFragment : Fragment() {
-    private val viewModel: DetailViewModel by viewModelFactory {
+    private val viewModel: DetailViewModel by activityViewModelFactory {
         DetailViewModel(pokemonRepository)
     }
     private lateinit var binding: FragmentDetailsBinding
@@ -48,10 +49,22 @@ class DetailFragment : Fragment() {
     private val paletteColors: StateFlow<PaletteColors> = _paletteColors.asStateFlow()
 
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        sharedElementEnterTransition = TransitionInflater.from(requireContext())
+            .inflateTransition(android.R.transition.move)
+        sharedElementReturnTransition = TransitionInflater.from(requireContext())
+            .inflateTransition(android.R.transition.move)
+
+        postponeEnterTransition()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentDetailsBinding.inflate(layoutInflater)
+        binding.ivPokemonImg.transitionName = "pokemon_image_${args.pokemonId}" // must match
 
         binding.backBtn.setOnClickListener { findNavController().navigateUp() }
         adapter = PokeDetailsAdapter(
@@ -116,10 +129,11 @@ class DetailFragment : Fragment() {
                                 _paletteColors.value = color
                             }
                         }
-
+                        startPostponedEnterTransition()
                     }
 
                     is ImageLoadState.Error -> {
+                        startPostponedEnterTransition()
                         Log.e(
                             "ImageView.loadImage", "Image load failed", state.throwable
                         )
@@ -147,6 +161,7 @@ class DetailFragment : Fragment() {
             )
         }
     }
+
     private fun setPokemonTypes() {
         val inflater = LayoutInflater.from(requireContext())
         val parentLayout = view?.findViewById<LinearLayout>(R.id.layoutPowerTypes)

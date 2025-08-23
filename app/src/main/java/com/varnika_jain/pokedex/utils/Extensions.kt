@@ -74,12 +74,11 @@ sealed class ImageLoadState {
     data class Error(val throwable: Throwable?) : ImageLoadState()
 }
 
-
-inline fun <reified VM : ViewModel> Fragment.viewModelFactory(
+inline fun <reified VM : ViewModel> Fragment.activityViewModelFactory(
     crossinline provider: () -> VM
 ): Lazy<VM> {
     return lazy {
-        ViewModelProvider(this, GenericViewModelFactory { provider() })[VM::class.java]
+        ViewModelProvider(requireActivity(), GenericViewModelFactory { provider() })[VM::class.java]
     }
 }
 

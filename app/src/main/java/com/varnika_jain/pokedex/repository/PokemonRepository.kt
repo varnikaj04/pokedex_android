@@ -12,7 +12,7 @@ class PokemonRepository(
     private val pokemonService: PokemonService
 ) {
 
-    fun getPokemonList(limit: Int): Flow<Result<List<Pokemon>>> = flow {
+    fun getPokemonList(limit: Int): Flow<Result<ArrayList<Pokemon>>> = flow {
         try {
             emit(Result.Loading)
             val response = pokemonService.getPokemonList(limit)

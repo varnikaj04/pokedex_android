@@ -5,19 +5,22 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.varnika_jain.pokedex.R
 import com.varnika_jain.pokedex.data.remote.Result
 import com.varnika_jain.pokedex.data.remote.RetrofitInstance.pokemonRepository
 import com.varnika_jain.pokedex.databinding.FragmentHomeBinding
+import com.varnika_jain.pokedex.utils.activityViewModelFactory
 import com.varnika_jain.pokedex.utils.collectFlow
-import com.varnika_jain.pokedex.utils.viewModelFactory
 
 class HomeFragment : Fragment() {
-    private val viewModel: HomeViewModel by viewModelFactory {
+    private val viewModel: HomeViewModel by activityViewModelFactory {
         HomeViewModel(pokemonRepository)
     }
+
     private lateinit var binding: FragmentHomeBinding
     private lateinit var adapter: PokemonAdapter
 
@@ -26,11 +29,19 @@ class HomeFragment : Fragment() {
     ): View? {
         binding = FragmentHomeBinding.inflate(layoutInflater)
         adapter = PokemonAdapter(
-            requireContext(), arrayListOf()
-        ) { pokemon ->
-            val bundle = Bundle()
-            bundle.putInt("pokemonId", pokemon.id)
-            findNavController().navigate(R.id.action_homeFragment_to_detailFragment, bundle)
+            requireContext()
+        ) { pokemon, imageView ->
+            val bundle = Bundle().apply {
+                putInt("pokemonId", pokemon.id)
+            }
+
+            val extras = FragmentNavigatorExtras(
+                imageView to "pokemon_image_${pokemon.id}" // unique transition name
+            )
+
+            findNavController().navigate(
+                R.id.action_homeFragment_to_detailFragment, bundle, null, extras
+            )
         }
         return binding.root
     }
@@ -38,7 +49,14 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.fetchPokemonList(10)
+        postponeEnterTransition()
+        binding.recyclerView.doOnPreDraw {
+            startPostponedEnterTransition()
+        }
+
+        if (viewModel.pokemonState.value !is Result.Success) {
+            viewModel.fetchPokemonList(10)
+        }
         binding.recyclerView.adapter = adapter
 
         collectFlow(viewModel.pokemonState) { result ->
@@ -48,7 +66,7 @@ class HomeFragment : Fragment() {
                 }
 
                 is Result.Success -> {
-                    adapter.submitList(ArrayList(result.data))
+                    adapter.submitList(result.data)
                     Log.d("TAG", "onViewCreated: Success... ")
                 }
 
