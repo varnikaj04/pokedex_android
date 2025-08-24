@@ -2,4 +2,11 @@
     <string name="app_name">Pokedex</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="experience">Experience</string>
+    <string name="height">Height</string>
+    <string name="weight">Weight</string>
+    <string name="back">Back</string>
+    <string name="base_stats">Base Stats</string>
+    <string name="str_pokemon_weight">%1$d KG\nWeight</string>
+    <string name="str_pokemon_height">%1$d M\nHeight</string>
 </resources>

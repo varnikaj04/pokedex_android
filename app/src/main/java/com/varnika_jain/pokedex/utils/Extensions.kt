@@ -3,23 +3,23 @@ package com.varnika_jain.pokedex.utils
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import coil.ImageLoader
 import coil.decode.SvgDecoder
 import coil.load
 import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import coil.transform.RoundedCornersTransformation
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 
-fun FragmentManager.replaceFragment(
-    fragment: Fragment,
-    containerId: Int,
-    addToBackStack: Boolean = true
-) {
-    val transaction = beginTransaction().replace(containerId, fragment)
-    if (addToBackStack) transaction.addToBackStack(null)
-    transaction.commit()
+fun Int.buildImageUrl(): String {
+    return "https://unpkg.com/pokeapi-sprites@2.0.2/sprites/pokemon/other/dream-world/$this.svg"
 }
 
 fun ImageView.loadImage(
@@ -74,3 +74,22 @@ sealed class ImageLoadState {
     data class Error(val throwable: Throwable?) : ImageLoadState()
 }
 
+inline fun <reified VM : ViewModel> Fragment.activityViewModelFactory(
+    crossinline provider: () -> VM
+): Lazy<VM> {
+    return lazy {
+        ViewModelProvider(requireActivity(), GenericViewModelFactory { provider() })[VM::class.java]
+    }
+}
+
+inline fun <T> Fragment.collectFlow(
+    flow: Flow<T>,
+    state: Lifecycle.State = Lifecycle.State.STARTED,
+    crossinline collector: suspend (T) -> Unit
+) {
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(state) {
+            flow.collect { value -> collector(value) }
+        }
+    }
+}
