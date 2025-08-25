@@ -13,6 +13,7 @@ class HomeViewModel(
     private val repository: PokemonRepository
 ) : ViewModel() {
 
+    var lastSearchQuery: String = ""
     private val _pokemonState = MutableStateFlow<Result<ArrayList<Pokemon>>>(Result.Loading)
     val pokemonState: StateFlow<Result<ArrayList<Pokemon>>> = _pokemonState
 

@@ -16,6 +16,7 @@
             android:paddingTop="10dp"
             android:textSize="24sp"
             app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/search_item"
             app:title="@string/app_name" />
 
         <androidx.recyclerview.widget.RecyclerView

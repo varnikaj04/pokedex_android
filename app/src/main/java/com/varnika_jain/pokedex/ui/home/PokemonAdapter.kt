@@ -34,6 +34,7 @@ class PokemonAdapter(
     }
 
     private val asyncListDiffer = AsyncListDiffer(this, diffUtil)
+    private var originalList: List<Pokemon> = emptyList()
 
     class PokemonViewHolder(val binding: ListItemPokemonBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -95,6 +96,20 @@ class PokemonAdapter(
     }
 
     fun submitList(pokeList: ArrayList<Pokemon>) {
+        if (originalList.isEmpty()){
+            originalList = pokeList
+        }
         asyncListDiffer.submitList(pokeList)
+    }
+
+    fun filterList(query: String) {
+        val filteredList = if (query.isBlank()) {
+            originalList
+        } else {
+            originalList.filter {
+                it.name.contains(query, ignoreCase = true)
+            }
+        }
+        asyncListDiffer.submitList(filteredList)
     }
 }
