@@ -10,4 +10,5 @@
     <string name="str_pokemon_weight">%1$d KG\nWeight</string>
     <string name="str_pokemon_height">%1$d M\nHeight</string>
     <string name="search">Search</string>
+    <string name="load_more">Load More</string>
 </resources>

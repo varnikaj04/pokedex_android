@@ -1,8 +1,9 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Base.Theme.Pokedex" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Pokedex" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:colorPrimary">@color/primary</item>
     </style>
 
     <style name="RoundedImageView" parent="">
@@ -10,6 +11,4 @@
         <item name="cornerSizeBottomLeft">40dp</item>
         <item name="cornerSizeBottomRight">40dp</item>
     </style>
-
-    <style name="Theme.Pokedex" parent="Base.Theme.Pokedex" />
 </resources>

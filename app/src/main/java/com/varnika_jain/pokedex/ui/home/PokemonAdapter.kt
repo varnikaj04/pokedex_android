@@ -20,38 +20,47 @@ import com.varnika_jain.pokedex.utils.buildImageUrl
 import com.varnika_jain.pokedex.utils.loadImage
 
 class PokemonAdapter(
-    val context: Context, private val onPokemonClick: (Pokemon, ImageView) -> Unit
+    val context: Context,
+    private val onPokemonClick: (Pokemon, ImageView) -> Unit,
 ) : RecyclerView.Adapter<PokemonAdapter.PokemonViewHolder>() {
-    private val diffUtil = object : DiffUtil.ItemCallback<Pokemon>() {
-        override fun areItemsTheSame(oldItem: Pokemon, newItem: Pokemon): Boolean {
-            return oldItem.id == newItem.id
-        }
+    private val diffUtil =
+        object : DiffUtil.ItemCallback<Pokemon>() {
+            override fun areItemsTheSame(
+                oldItem: Pokemon,
+                newItem: Pokemon,
+            ): Boolean = oldItem.id == newItem.id
 
-        override fun areContentsTheSame(oldItem: Pokemon, newItem: Pokemon): Boolean {
-            return oldItem == newItem
+            override fun areContentsTheSame(
+                oldItem: Pokemon,
+                newItem: Pokemon,
+            ): Boolean = oldItem == newItem
         }
-
-    }
 
     private val asyncListDiffer = AsyncListDiffer(this, diffUtil)
-    private var originalList: List<Pokemon> = emptyList()
+    private var originalList: ArrayList<Pokemon> = ArrayList()
 
-    class PokemonViewHolder(val binding: ListItemPokemonBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    class PokemonViewHolder(
+        val binding: ListItemPokemonBinding,
+    ) : RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokemonViewHolder {
-        return PokemonViewHolder(
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): PokemonViewHolder =
+        PokemonViewHolder(
             ListItemPokemonBinding.inflate(
-                LayoutInflater.from(context), parent, false
-            )
+                LayoutInflater.from(context),
+                parent,
+                false,
+            ),
         )
-    }
 
-    override fun getItemCount(): Int {
-        return asyncListDiffer.currentList.size
-    }
+    override fun getItemCount(): Int = asyncListDiffer.currentList.size
 
-    override fun onBindViewHolder(holder: PokemonViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: PokemonViewHolder,
+        position: Int,
+    ) {
         holder.binding.apply {
             val pokemon = asyncListDiffer.currentList[position]
             val progressBar: ProgressBar = loadingSpinner
@@ -72,14 +81,14 @@ class PokemonAdapter(
                                     swatch?.let {
                                         pokeLayout.setBackgroundColor(
                                             ColorUtils.setAlphaComponent(
-                                                it.rgb, (0.7f * 255).toInt()
-                                            )
+                                                it.rgb,
+                                                (0.7f * 255).toInt(),
+                                            ),
                                         )
                                         tvPokeName.setTextColor(it.bodyTextColor)
                                     }
                                 }
                             }
-
                         }
 
                         is ImageLoadState.Error -> {
@@ -87,29 +96,18 @@ class PokemonAdapter(
                             Log.e("ImageView.loadImage", "Image load failed", state.throwable)
                         }
                     }
-                })
+                },
+            )
             tvPokeName.text = pokemon.name.replaceFirstChar { it.uppercaseChar() }
 
             holder.itemView.setOnClickListener { onPokemonClick(pokemon, imgPokemon) }
-
         }
     }
 
     fun submitList(pokeList: ArrayList<Pokemon>) {
-        if (originalList.isEmpty()){
+        if (originalList.isEmpty()) {
             originalList = pokeList
         }
         asyncListDiffer.submitList(pokeList)
-    }
-
-    fun filterList(query: String) {
-        val filteredList = if (query.isBlank()) {
-            originalList
-        } else {
-            originalList.filter {
-                it.name.contains(query, ignoreCase = true)
-            }
-        }
-        asyncListDiffer.submitList(filteredList)
     }
 }
