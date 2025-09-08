@@ -7,28 +7,28 @@ import com.varnika_jain.pokedex.data.remote.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-
 class PokemonRepository(
-    private val pokemonService: PokemonService
+    private val pokemonService: PokemonService,
 ) {
-
-    fun getPokemonList(limit: Int): Flow<Result<ArrayList<Pokemon>>> = flow {
-        try {
-            emit(Result.Loading)
-            val response = pokemonService.getPokemonList(limit)
-            emit(Result.Success(response.results))
-        } catch (e: Exception) {
-            emit(Result.Error(e.localizedMessage ?: "Unknown error"))
+    fun getPokemonList(): Flow<Result<ArrayList<Pokemon>>> =
+        flow {
+            try {
+                emit(Result.Loading)
+                val response = pokemonService.getPokemonList()
+                emit(Result.Success(response.results))
+            } catch (e: Exception) {
+                emit(Result.Error(e.localizedMessage ?: "Unknown error"))
+            }
         }
-    }
 
-    fun getPokemonDetails(id: Int): Flow<Result<PokemonDetails>> = flow {
-        try {
-            emit(Result.Loading)
-            val response = pokemonService.getPokemonDetails(id)
-            emit(Result.Success(response))
-        } catch (e: Exception) {
-            emit(Result.Error(e.localizedMessage ?: "Unknown error"))
+    fun getPokemonDetails(id: Int): Flow<Result<PokemonDetails>> =
+        flow {
+            try {
+                emit(Result.Loading)
+                val response = pokemonService.getPokemonDetails(id)
+                emit(Result.Success(response))
+            } catch (e: Exception) {
+                emit(Result.Error(e.localizedMessage ?: "Unknown error"))
+            }
         }
-    }
 }

@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -21,32 +22,45 @@ class HomeFragment : Fragment() {
         HomeViewModel(pokemonRepository)
     }
 
+    //    private var pokemonList = ArrayList<Pokemon>()
     private lateinit var binding: FragmentHomeBinding
     private lateinit var adapter: PokemonAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View? {
         binding = FragmentHomeBinding.inflate(layoutInflater)
-        adapter = PokemonAdapter(
-            requireContext()
-        ) { pokemon, imageView ->
-            val bundle = Bundle().apply {
-                putInt("pokemonId", pokemon.id)
+        adapter =
+            PokemonAdapter(
+                requireContext(),
+            ) { pokemon, imageView ->
+                val bundle =
+                    Bundle().apply {
+                        putInt("pokemonId", pokemon.id)
+                    }
+
+                val extras =
+                    FragmentNavigatorExtras(
+                        imageView to "pokemon_image_${pokemon.id}",
+                    )
+
+                findNavController().navigate(
+                    R.id.action_homeFragment_to_detailFragment,
+                    bundle,
+                    null,
+                    extras,
+                )
             }
-
-            val extras = FragmentNavigatorExtras(
-                imageView to "pokemon_image_${pokemon.id}" // unique transition name
-            )
-
-            findNavController().navigate(
-                R.id.action_homeFragment_to_detailFragment, bundle, null, extras
-            )
-        }
+        binding.recyclerView.adapter = adapter
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         postponeEnterTransition()
@@ -54,10 +68,9 @@ class HomeFragment : Fragment() {
             startPostponedEnterTransition()
         }
 
-        if (viewModel.pokemonState.value !is Result.Success) {
-            viewModel.fetchPokemonList(10)
+        collectFlow(viewModel.filteredPokemon) {
+            adapter.submitList(ArrayList(it))
         }
-        binding.recyclerView.adapter = adapter
 
         collectFlow(viewModel.pokemonState) { result ->
             when (result) {
@@ -66,14 +79,39 @@ class HomeFragment : Fragment() {
                 }
 
                 is Result.Success -> {
-                    adapter.submitList(result.data)
-                    Log.d("TAG", "onViewCreated: Success... ")
+                    binding.progressPokemon.visibility = View.GONE
+                    /*pokemonList = result.data
+                    adapter.submitList(pokemonList)*/
                 }
 
                 is Result.Error -> {
+                    binding.progressPokemon.visibility = View.GONE
                     Log.d("TAG", "onViewCreated: Error... ")
                 }
             }
         }
+        if (viewModel.pokemonState.value !is Result.Success) {
+            viewModel.fetchPokemonList()
+        }
+
+        val searchItem = binding.toolBar.menu.findItem(R.id.searchPokemon)
+        val searchView = searchItem.actionView as SearchView
+        searchView.queryHint = "Search Pokémon"
+
+        if (viewModel.searchQuery.value.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(viewModel.searchQuery.value, false)
+        }
+
+        searchView.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean = true
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.setSearchQuery(newText.orEmpty())
+                    return true
+                }
+            },
+        )
     }
 }

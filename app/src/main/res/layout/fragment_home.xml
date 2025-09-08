@@ -12,10 +12,11 @@
             android:id="@+id/toolBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary"
+            android:background="?android:attr/colorPrimary"
             android:paddingTop="10dp"
             android:textSize="24sp"
             app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/search_item"
             app:title="@string/app_name" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -32,6 +33,26 @@
             app:spanCount="2"
             tools:itemCount="10"
             tools:listitem="@layout/list_item_pokemon" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/loadMoreBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/load_more"
+            app:layout_constraintTop_toBottomOf="@id/recyclerView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <ProgressBar
+            android:id="@+id/progressPokemon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:progressTint="@color/primary"
+            app:layout_constraintBottom_toBottomOf="@id/recyclerView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/recyclerView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
