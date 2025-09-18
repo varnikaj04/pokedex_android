@@ -20,7 +20,8 @@ object RetrofitInstance {
     }
 
     val apiService: PokemonService by lazy {
-        Retrofit.Builder()
+        Retrofit
+            .Builder()
             .baseUrl(BASE_URL)
             .client(getOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create())
@@ -35,6 +36,30 @@ object RetrofitInstance {
 
 sealed class Result<out T> {
     data object Loading : Result<Nothing>()
-    data class Success<T>(val data: T) : Result<T>()
-    data class Error(val message: String) : Result<Nothing>()
+
+    data class Success<T>(
+        val data: T,
+    ) : Result<T>()
+
+    data class Error(
+        val message: String,
+    ) : Result<Nothing>()
+}
+
+sealed class ApiResponse<T>(
+    val data: T? = null,
+    val message: String? = null,
+) {
+    class Loading<T>(
+        data: T? = null,
+    ) : ApiResponse<T>(data = data)
+
+    class Success<T>(
+        data: T,
+    ) : ApiResponse<T>(data = data)
+
+    class Error<T>(
+        data: T? = null,
+        message: String,
+    ) : ApiResponse<T>(data, message)
 }

@@ -19,9 +19,12 @@
         android:name="com.varnika_jain.pokedex.ui.details.DetailFragment"
         android:label="DetailFragment"
         tools:layout="@layout/fragment_details">
-        <argument
+        <!--<argument
             android:name="pokemonId"
             android:defaultValue="0"
+            app:argType="integer" />-->
+        <argument
+            android:name="pokemonId"
             app:argType="integer" />
     </fragment>
 </navigation>

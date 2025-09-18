@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 class DetailFragment : Fragment() {
     private val viewModel: DetailViewModel by activityViewModelFactory {
         DetailViewModel(pokemonRepository)
@@ -48,33 +47,45 @@ class DetailFragment : Fragment() {
     private val _paletteColors = MutableStateFlow(PaletteColors(null, null))
     private val paletteColors: StateFlow<PaletteColors> = _paletteColors.asStateFlow()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedElementEnterTransition = TransitionInflater.from(requireContext())
-            .inflateTransition(android.R.transition.move)
-        sharedElementReturnTransition = TransitionInflater.from(requireContext())
-            .inflateTransition(android.R.transition.move)
+        sharedElementEnterTransition =
+            TransitionInflater
+                .from(requireContext())
+                .inflateTransition(android.R.transition.move)
+        sharedElementReturnTransition =
+            TransitionInflater
+                .from(requireContext())
+                .inflateTransition(android.R.transition.move)
 
         postponeEnterTransition()
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentDetailsBinding.inflate(layoutInflater)
-        binding.ivPokemonImg.transitionName = "pokemon_image_${args.pokemonId}" // must match
+        val pokemonId = args.pokemonId
+        Log.d("TAG", "onCreateView: $pokemonId")
+        binding.ivPokemonImg.transitionName = "pokemon_image_$pokemonId" // must match
 
         binding.backBtn.setOnClickListener { findNavController().navigateUp() }
-        adapter = PokeDetailsAdapter(
-            context = requireContext(), statsList = arrayListOf()
-        )
+        adapter =
+            PokeDetailsAdapter(
+                context = requireContext(),
+                statsList = arrayListOf(),
+            )
 
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.fetchPokemonDetails(args.pokemonId)
@@ -105,10 +116,8 @@ class DetailFragment : Fragment() {
                     tintPowerTypes(bg)
                     setPokemonStats()
                 }
-
             }
         }
-
     }
 
     private fun setupPokemonImage() {
@@ -135,11 +144,14 @@ class DetailFragment : Fragment() {
                     is ImageLoadState.Error -> {
                         startPostponedEnterTransition()
                         Log.e(
-                            "ImageView.loadImage", "Image load failed", state.throwable
+                            "ImageView.loadImage",
+                            "Image load failed",
+                            state.throwable,
                         )
                     }
                 }
-            })
+            },
+        )
     }
 
     private fun setupPokemonDetails() {
@@ -157,7 +169,9 @@ class DetailFragment : Fragment() {
         binding.rvStats.adapter = adapter
         if (pokemonStats.isNotEmpty()) {
             adapter.submitStatsList(
-                pokemonStats, paletteColors.value.background, paletteColors.value.text
+                pokemonStats,
+                paletteColors.value.background,
+                paletteColors.value.text,
             )
         }
     }
@@ -186,18 +200,19 @@ class DetailFragment : Fragment() {
         }
     }
 
-    private suspend fun extractDominantColor(drawable: Drawable): PaletteColors? {
-        return withContext(Dispatchers.Default) {
+    private suspend fun extractDominantColor(drawable: Drawable): PaletteColors? =
+        withContext(Dispatchers.Default) {
             if (drawable is BitmapDrawable) {
                 val palette = Palette.from(drawable.bitmap).generate()
                 val swatch = palette.dominantSwatch ?: palette.vibrantSwatch
                 swatch?.let {
                     PaletteColors(
                         background = ColorUtils.setAlphaComponent(it.rgb, (0.7f * 255).toInt()),
-                        text = it.bodyTextColor
+                        text = it.bodyTextColor,
                     )
                 } ?: PaletteColors(null, null)
-            } else PaletteColors(null, null)
+            } else {
+                PaletteColors(null, null)
+            }
         }
-    }
 }
