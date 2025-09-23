@@ -14,24 +14,30 @@ class PokeDetailsAdapter(
     private var progressTint: Int? = null
     private var textTint: Int? = null
 
-    class DetailViewHolder(val binding: ItemStatsBarBinding) : RecyclerView.ViewHolder(binding.root)
+    class DetailViewHolder(
+        val binding: ItemStatsBarBinding,
+    ) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(
-        parent: ViewGroup, viewType: Int
-    ): DetailViewHolder {
-        return DetailViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): DetailViewHolder =
+        DetailViewHolder(
             ItemStatsBarBinding.inflate(
-                LayoutInflater.from(context), parent, false
-            )
+                LayoutInflater.from(context),
+                parent,
+                false,
+            ),
         )
-    }
 
     override fun onBindViewHolder(
-        holder: DetailViewHolder, position: Int
+        holder: DetailViewHolder,
+        position: Int,
     ) {
         with(holder) {
             binding.apply {
-                tvStatLabel.text = statsList[position]?.stat?.name
+                tvStatLabel.text =
+                    statsList[position]?.stat?.name?.replaceFirstChar { it.uppercaseChar() }
                 statsList[position]?.base_stat?.let { progressStats.setProgress(it, true) }
                 tvStatValue.text = statsList[position]?.base_stat.toString()
 
@@ -48,7 +54,9 @@ class PokeDetailsAdapter(
     override fun getItemCount() = statsList.size
 
     fun submitStatsList(
-        list: ArrayList<PokemonDetails.Stats?>, bgColor: Int? = null, textColor: Int? = null
+        list: ArrayList<PokemonDetails.Stats?>,
+        bgColor: Int? = null,
+        textColor: Int? = null,
     ) {
         statsList.clear()
         statsList.addAll(list)
@@ -56,5 +64,4 @@ class PokeDetailsAdapter(
         textColor?.let { textTint = it }
         notifyDataSetChanged()
     }
-
 }

@@ -1,6 +1,5 @@
 package com.varnika_jain.pokedex.ui.home
 
-import android.content.Context
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,8 +9,6 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
-import androidx.recyclerview.widget.AsyncListDiffer
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.varnika_jain.pokedex.data.remote.Pokemon
 import com.varnika_jain.pokedex.databinding.ItemLoadingBinding
@@ -20,7 +17,6 @@ import com.varnika_jain.pokedex.utils.ImageLoadState
 import com.varnika_jain.pokedex.utils.loadImage
 
 class PokemonAdapter(
-    val context: Context,
     private val onPokemonClick: (Pokemon?, ImageView) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
@@ -29,23 +25,9 @@ class PokemonAdapter(
     }
 
     private val pokemonList: ArrayList<Pokemon?> = ArrayList() // filtered list
-    private val fullList: ArrayList<Pokemon?> = ArrayList() // full list
+//    private val fullList: ArrayList<Pokemon?> = ArrayList() // full list
 
     private var showLoadingFooter = false
-    private val diffUtil =
-        object : DiffUtil.ItemCallback<Pokemon>() {
-            override fun areItemsTheSame(
-                oldItem: Pokemon,
-                newItem: Pokemon,
-            ): Boolean = oldItem.id == newItem.id
-
-            override fun areContentsTheSame(
-                oldItem: Pokemon,
-                newItem: Pokemon,
-            ): Boolean = oldItem == newItem
-        }
-
-    private val asyncListDiffer = AsyncListDiffer(this, diffUtil)
 
     class PokemonViewHolder(
         val binding: ListItemPokemonBinding,
@@ -144,30 +126,13 @@ class PokemonAdapter(
         }
     }
 
-    /*fun submitList(pokeList: ArrayList<Pokemon>) {
-        originalList = pokeList.map { it as Pokemon? }.toCollection(ArrayList())
-        if (isLoadingFooterAdded) originalList.add(null)
-        asyncListDiffer.submitList(originalList)
-    }
-
-    fun showLoadingFooter(show: Boolean) {
-        isLoadingFooterAdded = show
-        submitList(originalList.filterNotNull() as ArrayList<Pokemon>)
-    }*/
-    fun submitPokemonList(
-        newList: List<Pokemon?>,
-        append: Boolean,
-    ) {
-        if (!append) {
-            fullList.clear()
-            pokemonList.clear()
-        }
-        fullList.addAll(newList)
+    fun submitPokemonList(newList: List<Pokemon?>) {
+        pokemonList.clear()
         pokemonList.addAll(newList)
         notifyDataSetChanged()
     }
 
-    fun filter(query: String) {
+    /*fun filter(query: String) {
         pokemonList.clear()
         if (query.isEmpty()) {
             pokemonList.addAll(fullList)
@@ -182,7 +147,7 @@ class PokemonAdapter(
             )
         }
         notifyDataSetChanged()
-    }
+    }*/
 
     fun showLoadingFooter(show: Boolean) {
         if (show == showLoadingFooter) return
