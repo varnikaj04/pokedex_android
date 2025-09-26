@@ -23,14 +23,12 @@
             android:id="@+id/recyclerView"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolBar"
             app:layout_constraintVertical_bias="0.0"
-            app:spanCount="2"
             tools:itemCount="10"
             tools:listitem="@layout/list_item_pokemon" />
 
@@ -47,7 +45,7 @@
             android:id="@+id/progressPokemon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="visible"
+            android:visibility="gone"
             android:progressTint="@color/primary"
             app:layout_constraintBottom_toBottomOf="@id/recyclerView"
             app:layout_constraintEnd_toEndOf="parent"
