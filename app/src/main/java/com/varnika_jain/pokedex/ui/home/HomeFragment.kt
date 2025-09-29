@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -132,25 +133,32 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
+        collectFlow(viewModel.filteredPokemon) { list ->
+            binding.progressPokemon.visibility = View.GONE
+            adapter.showLoadingFooter(false)
+            adapter.submitPokemonList(ArrayList(list))
+        }
+
+        val searchItem = binding.toolBar.menu.findItem(R.id.searchPokemon)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.queryHint = "Search Pokémon"
+
+        if (viewModel.searchQuery.value.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(viewModel.searchQuery.value, false)
+        }
+
+        searchView.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean = true
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.setSearchQuery(newText.orEmpty())
+                    return true
+                }
+            },
+        )
     }
-
-    /*val searchItem = binding.toolBar.menu.findItem(R.id.searchPokemon)
-    val searchView = searchItem.actionView as SearchView
-    searchView.queryHint = "Search Pokémon"
-
-    if (viewModel.searchQuery.value.isNotEmpty()) {
-        searchItem.expandActionView()
-        searchView.setQuery(viewModel.searchQuery.value, false)
-    }
-
-    searchView.setOnQueryTextListener(
-        object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = true
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.setSearchQuery(newText.orEmpty())
-                return true
-            }
-        },
-    )*/
 }

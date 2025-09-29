@@ -7,14 +7,17 @@ import com.varnika_jain.pokedex.data.remote.Pokemon
 import com.varnika_jain.pokedex.data.remote.PokemonResponse
 import com.varnika_jain.pokedex.repository.PokemonRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val repository: PokemonRepository,
 ) : ViewModel() {
-    /*private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery*/
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
 
     private val _pokemonFlow = MutableStateFlow<ApiResponse<PokemonResponse>>(ApiResponse.Loading())
     val pokemonFlow: StateFlow<ApiResponse<PokemonResponse>> = _pokemonFlow
@@ -84,11 +87,10 @@ class HomeViewModel(
 
     fun hasNextPage(): Boolean = nextUrl != null
 
-    /*
     val filteredPokemon: StateFlow<List<Pokemon>> =
-        pokemonState
-            .combine(_searchQuery) { result, query ->
-                val list = (result as? Result.Success)?.data ?: emptyList()
+        _pokemonFlow
+            .combine(_searchQuery) { response, query ->
+                val list = (response as? ApiResponse.Success)?.data?.results ?: emptyList()
                 if (query.isBlank()) {
                     list
                 } else {
@@ -98,5 +100,5 @@ class HomeViewModel(
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
-    }*/
+    }
 }

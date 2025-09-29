@@ -24,8 +24,7 @@ class PokemonAdapter(
         const val TYPE_LOADING = 1
     }
 
-    private val pokemonList: ArrayList<Pokemon?> = ArrayList() // filtered list
-//    private val fullList: ArrayList<Pokemon?> = ArrayList() // full list
+    private val pokemonList: ArrayList<Pokemon?> = ArrayList()
 
     private var showLoadingFooter = false
 
@@ -131,23 +130,6 @@ class PokemonAdapter(
         pokemonList.addAll(newList)
         notifyDataSetChanged()
     }
-
-    /*fun filter(query: String) {
-        pokemonList.clear()
-        if (query.isEmpty()) {
-            pokemonList.addAll(fullList)
-        } else {
-            pokemonList.addAll(
-                fullList.filter {
-                    it?.name?.contains(
-                        query,
-                        ignoreCase = true,
-                    ) == true
-                },
-            )
-        }
-        notifyDataSetChanged()
-    }*/
 
     fun showLoadingFooter(show: Boolean) {
         if (show == showLoadingFooter) return
