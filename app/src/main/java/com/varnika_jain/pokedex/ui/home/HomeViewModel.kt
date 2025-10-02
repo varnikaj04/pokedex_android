@@ -31,6 +31,7 @@ class HomeViewModel(
     val pokemonList: List<Pokemon> get() = _pokemonList
 
     fun getPokemonList(initial: Boolean = false) {
+        if (searchQuery.value.isNotBlank()) return
         if (isLoading) return
 
         if (initial && _pokemonList.isNotEmpty()) {
@@ -85,18 +86,17 @@ class HomeViewModel(
         }
     }
 
-    fun hasNextPage(): Boolean = nextUrl != null
+    fun hasNextPage(): Boolean = searchQuery.value.isBlank() && nextUrl != null
 
     val filteredPokemon: StateFlow<List<Pokemon>> =
-        _pokemonFlow
-            .combine(_searchQuery) { response, query ->
-                val list = (response as? ApiResponse.Success)?.data?.results ?: emptyList()
-                if (query.isBlank()) {
-                    list
-                } else {
-                    list.filter { it.name.contains(query, ignoreCase = true) }
-                }
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        combine(_searchQuery, _pokemonFlow) { query, response ->
+            val list = (response as? ApiResponse.Success)?.data?.results ?: emptyList()
+            if (query.isBlank()) {
+                list
+            } else {
+                _pokemonList.filter { it.name.startsWith(query, ignoreCase = true) }
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query

@@ -145,7 +145,9 @@ class HomeFragment : Fragment() {
 
         searchView.queryHint = "Search Pokémon"
 
-        if (viewModel.searchQuery.value.isNotEmpty()) {
+        if (!viewModel.hasNextPage()) return
+
+        if (viewModel.searchQuery.value.isNotBlank()) {
             searchItem.expandActionView()
             searchView.setQuery(viewModel.searchQuery.value, false)
         }
