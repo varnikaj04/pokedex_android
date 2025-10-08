@@ -10,56 +10,27 @@ object RetrofitInstance {
     private const val BASE_URL = "https://pokeapi.co/api/v2/"
 
     private fun getOkHttpClient(): OkHttpClient {
-        val builder = OkHttpClient.Builder()
-
-        val loggingInterceptor = HttpLoggingInterceptor()
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        builder.addInterceptor(loggingInterceptor)
-
-        return builder.build()
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
     }
 
-    val apiService: PokemonService by lazy {
-        Retrofit
-            .Builder()
+    private val retrofit: Retrofit by lazy {
+        Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(getOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(PokemonService::class.java)
+    }
+
+    val apiService: PokemonService by lazy {
+        retrofit.create(PokemonService::class.java)
     }
 
     val pokemonRepository by lazy {
         PokemonRepository(apiService)
     }
-}
-
-sealed class Result<out T> {
-    data object Loading : Result<Nothing>()
-
-    data class Success<T>(
-        val data: T,
-    ) : Result<T>()
-
-    data class Error(
-        val message: String,
-    ) : Result<Nothing>()
-}
-
-sealed class ApiResponse<T>(
-    val data: T? = null,
-    val message: String? = null,
-) {
-    class Loading<T>(
-        data: T? = null,
-    ) : ApiResponse<T>(data = data)
-
-    class Success<T>(
-        data: T,
-    ) : ApiResponse<T>(data = data)
-
-    class Error<T>(
-        data: T? = null,
-        message: String,
-    ) : ApiResponse<T>(data, message)
 }

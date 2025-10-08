@@ -20,13 +20,12 @@ import com.google.android.material.textview.MaterialTextView
 import com.varnika_jain.pokedex.R
 import com.varnika_jain.pokedex.data.local.PaletteColors
 import com.varnika_jain.pokedex.data.remote.PokemonDetails
-import com.varnika_jain.pokedex.data.remote.Result
+import com.varnika_jain.pokedex.data.remote.Resource
 import com.varnika_jain.pokedex.data.remote.RetrofitInstance.pokemonRepository
 import com.varnika_jain.pokedex.databinding.FragmentDetailsBinding
 import com.varnika_jain.pokedex.utils.ImageLoadState
 import com.varnika_jain.pokedex.utils.activityViewModelFactory
 import com.varnika_jain.pokedex.utils.buildImageUrl
-import com.varnika_jain.pokedex.utils.collectFlow
 import com.varnika_jain.pokedex.utils.loadImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,13 +50,9 @@ class DetailFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         sharedElementEnterTransition =
-            TransitionInflater
-                .from(requireContext())
-                .inflateTransition(android.R.transition.move)
+            TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.move)
         sharedElementReturnTransition =
-            TransitionInflater
-                .from(requireContext())
-                .inflateTransition(android.R.transition.move)
+            TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.move)
 
         postponeEnterTransition()
     }
@@ -73,11 +68,10 @@ class DetailFragment : Fragment() {
         binding.ivPokemonImg.transitionName = "pokemon_image_$pokemonId" // must match
 
         binding.backBtn.setOnClickListener { findNavController().navigateUp() }
-        adapter =
-            PokeDetailsAdapter(
-                context = requireContext(),
-                statsList = arrayListOf(),
-            )
+        adapter = PokeDetailsAdapter(
+            context = requireContext(),
+            statsList = arrayListOf(),
+        )
 
         return binding.root
     }
@@ -90,24 +84,7 @@ class DetailFragment : Fragment() {
 
         viewModel.fetchPokemonDetails(args.pokemonId)
 
-        collectFlow(viewModel.pokemonState) { result ->
-            when (result) {
-                is Result.Loading -> {
-                    Log.d("TAG", "onViewCreated: Loading... ")
-                }
-
-                is Result.Success -> {
-                    pokemonDetails = result.data
-                    setupPokemonImage()
-                    setupPokemonDetails()
-                    Log.d("TAG", "onViewCreated: Success... Result ${result.data.name} ")
-                }
-
-                is Result.Error -> {
-                    Log.d("TAG", "onViewCreated: Error... ")
-                }
-            }
-        }
+        observeDetails()
 
         viewLifecycleOwner.lifecycleScope.launch {
             paletteColors.collectLatest { colors ->
@@ -115,6 +92,24 @@ class DetailFragment : Fragment() {
                     binding.ivPokemonImg.setBackgroundColor(bg)
                     tintPowerTypes(bg)
                     setPokemonStats()
+                }
+            }
+        }
+    }
+    private fun observeDetails() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.pokemonDetails.collectLatest { state ->
+                when (state) {
+                    is Resource.Loading -> Log.d("TAG", "onViewCreated: Loading... ")
+
+                    is Resource.Success -> {
+                        pokemonDetails = state.data
+                        setupPokemonImage()
+                        setupPokemonDetails()
+                        Log.d("TAG", "onViewCreated: Success... Result ${state.data.name} ")
+                    }
+
+                    is Resource.Error -> Log.d("TAG", "onViewCreated: Error... ")
                 }
             }
         }

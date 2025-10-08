@@ -15,5 +15,5 @@ interface PokemonService {
     @GET("pokemon/{id}")
     suspend fun getPokemonDetails(
         @Path("id") pokemonId: Int,
-    ): PokemonDetails
+    ): Response<PokemonDetails>
 }

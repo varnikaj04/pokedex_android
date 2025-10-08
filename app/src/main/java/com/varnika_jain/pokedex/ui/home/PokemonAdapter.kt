@@ -24,10 +24,26 @@ class PokemonAdapter(
         const val TYPE_LOADING = 1
     }
 
-    private val pokemonList: ArrayList<Pokemon?> = ArrayList() // filtered list
-//    private val fullList: ArrayList<Pokemon?> = ArrayList() // full list
+    private val items = mutableListOf<Pokemon>()
+    private var showLoader = false
 
-    private var showLoadingFooter = false
+    fun submitList(newItems: List<Pokemon>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
+    }
+
+    fun showBottomLoader(show: Boolean) {
+        if (show == showLoader) return
+        showLoader = show
+        if (show) notifyItemInserted(items.size) else notifyItemRemoved(items.size)
+    }
+
+    override fun getItemViewType(position: Int): Int =
+        if (position < items.size) TYPE_ITEM else TYPE_LOADING
+
+    override fun getItemCount(): Int = items.size + if (showLoader) 1 else 0
+
 
     class PokemonViewHolder(
         val binding: ListItemPokemonBinding,
@@ -55,10 +71,6 @@ class PokemonAdapter(
             LoadingViewHolder(binding)
         }
 
-    override fun getItemCount(): Int = pokemonList.size + if (showLoadingFooter) 1 else 0
-
-    override fun getItemViewType(position: Int): Int = if (position < pokemonList.size) TYPE_ITEM else TYPE_LOADING
-
     override fun onBindViewHolder(
         holder: RecyclerView.ViewHolder,
         position: Int,
@@ -67,11 +79,11 @@ class PokemonAdapter(
             is PokemonViewHolder -> {
                 with(holder) {
                     binding.apply {
-                        val pokemon = pokemonList[position]
+                        val pokemon = items[position]
                         val progressBar: ProgressBar = loadingSpinner
-                        imgPokemon.transitionName = "pokemon_image_${pokemon?.id}"
+                        imgPokemon.transitionName = "pokemon_image_${pokemon.id}"
                         imgPokemon.loadImage(
-                            imageUrl = pokemon?.imageUrl ?: "",
+                            imageUrl = pokemon.imageUrl,
                             allowCaching = true,
                             imageLoadListener = { state ->
                                 when (state) {
@@ -112,7 +124,7 @@ class PokemonAdapter(
                                 }
                             },
                         )
-                        tvPokeName.text = pokemon?.name?.replaceFirstChar { it.uppercaseChar() }
+                        tvPokeName.text = pokemon.name.replaceFirstChar { it.uppercaseChar() }
                         holder.itemView.setOnClickListener { onPokemonClick(pokemon, imgPokemon) }
                     }
                 }
@@ -123,39 +135,6 @@ class PokemonAdapter(
                     binding.loadingFooter.isIndeterminate = true
                 }
             }
-        }
-    }
-
-    fun submitPokemonList(newList: List<Pokemon?>) {
-        pokemonList.clear()
-        pokemonList.addAll(newList)
-        notifyDataSetChanged()
-    }
-
-    /*fun filter(query: String) {
-        pokemonList.clear()
-        if (query.isEmpty()) {
-            pokemonList.addAll(fullList)
-        } else {
-            pokemonList.addAll(
-                fullList.filter {
-                    it?.name?.contains(
-                        query,
-                        ignoreCase = true,
-                    ) == true
-                },
-            )
-        }
-        notifyDataSetChanged()
-    }*/
-
-    fun showLoadingFooter(show: Boolean) {
-        if (show == showLoadingFooter) return
-        showLoadingFooter = show
-        if (show) {
-            notifyItemInserted(pokemonList.size)
-        } else {
-            notifyItemRemoved(pokemonList.size)
         }
     }
 }
